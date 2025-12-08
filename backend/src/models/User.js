@@ -71,6 +71,17 @@ const User = sequelize.define('User', {
     type: DataTypes.BOOLEAN,
     defaultValue: false
   },
+  // E2EE Encryption Keys
+  publicKey: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'User public key for E2EE messaging'
+  },
+  encryptedPrivateKey: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'User private key encrypted with password-derived key (stored for recovery)'
+  },
   createdAt: {
     type: DataTypes.DATE,
     defaultValue: DataTypes.NOW

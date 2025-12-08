@@ -85,6 +85,16 @@ const Navigation = () => {
           >
             💬 Nachrichten
           </a>
+          <a 
+            onClick={(e) => {
+              e.preventDefault();
+              navigate('/chat');
+              setUserMenuOpen(false);
+            }} 
+            style={styles.dropdownLink}
+          >
+            🔒 E2E Chat
+          </a>
           {user?.isAdmin && (
             <a 
               onClick={(e) => {
@@ -113,7 +123,7 @@ const Navigation = () => {
       {menuOpen && (
         <div style={styles.dropdown}>
           <a 
-            href="/#concept" 
+            href="/concept" 
             onClick={(e) => {
               e.preventDefault();
               navigate('/concept');
@@ -124,7 +134,7 @@ const Navigation = () => {
             Konzept
           </a>
           <a 
-            href="/#about" 
+            href="/about" 
             onClick={(e) => {
               e.preventDefault();
               navigate('/about');
@@ -135,7 +145,7 @@ const Navigation = () => {
             Über uns
           </a>
           <a 
-            href="/#contact" 
+            href="/contact" 
             onClick={(e) => {
               e.preventDefault();
               navigate('/contact');
@@ -146,7 +156,7 @@ const Navigation = () => {
             Kontakt
           </a>
           <a 
-            href="/#faq" 
+            href="/faq" 
             onClick={(e) => {
               e.preventDefault();
               navigate('/faq');
@@ -157,7 +167,7 @@ const Navigation = () => {
             FAQ
           </a>
           <a 
-            href="/#privacy" 
+            href="/privacy" 
             onClick={(e) => {
               e.preventDefault();
               navigate('/privacy');
@@ -168,7 +178,7 @@ const Navigation = () => {
             Datenschutz
           </a>
           <a 
-            href="/#terms" 
+            href="/terms" 
             onClick={(e) => {
               e.preventDefault();
               navigate('/terms');
@@ -179,7 +189,7 @@ const Navigation = () => {
             Nutzungsbedingungen
           </a>
           <a 
-            href="/#imprint" 
+            href="/imprint" 
             onClick={(e) => {
               e.preventDefault();
               navigate('/imprint');

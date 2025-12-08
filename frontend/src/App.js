@@ -13,6 +13,7 @@ import JobsAdminPage from './pages/JobsAdminPage';
 import RequestsPage from './pages/RequestsPage';
 import ApplicationsPage from './pages/ApplicationsPage';
 import MessagesPage from './pages/MessagesPage';
+import ChatPage from './pages/ChatPage';
 import AboutPage from './pages/AboutPage';
 import ContactPage from './pages/ContactPage';
 import PrivacyPage from './pages/PrivacyPage';
@@ -71,6 +72,7 @@ function App() {
           <Route path="/applications" element={<PrivateRoute><ApplicationsPage /></PrivateRoute>} />
           <Route path="/messages" element={<PrivateRoute><MessagesPage /></PrivateRoute>} />
           <Route path="/messages/:applicationId" element={<PrivateRoute><MessageThreadPage /></PrivateRoute>} />
+          <Route path="/chat" element={<PrivateRoute><ChatPage /></PrivateRoute>} />
           <Route path="/admin" element={<PrivateRoute><AdminDashboard /></PrivateRoute>} />
         </Routes>
       </Router>

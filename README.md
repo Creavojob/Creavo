@@ -8,7 +8,9 @@ Eine Full-Stack Jobbörse für die Medienbranche. Unternehmen und Privatpersonen
 - **Job Posting**: Unternehmen können Job-Angebote mit Budget, Anforderungen und Deadline posten
 - **Applications**: Freelancer können sich auf Jobs bewerben mit Angeboten
 - **Escrow Payment System**: PayPal Integration für sichere Zahlungsabwicklung
+- **🔐 End-to-End Encrypted Messages**: Verschlüsselte Kommunikation zwischen Clients & Freelancern
 - **Rating & Reviews**: Bewertungssystem für Freelancer und Auftraggeber
+- **Dispute Resolution**: Admin-Zugriff bei Streitfällen (nur wenn beide Parteien zustimmen)
 - **Project Management**: Verwaltung von Projektstatussen
 
 ## 🛠️ Tech Stack
@@ -23,6 +25,7 @@ Eine Full-Stack Jobbörse für die Medienbranche. Unternehmen und Privatpersonen
 - **React 18**
 - **React Router v6**
 - **Axios für API Calls**
+- **TweetNaCl** für End-to-End Encryption (E2EE)
 
 ## 📦 Installation
 
@@ -99,6 +102,17 @@ Die App ist dann verfügbar unter `http://localhost:3000`
 - `POST /api/payments/:id/release` - Escrow-Zahlung freigeben
 - `POST /api/payments/:id/refund` - Zahlung rückgängig machen
 
+### Chat & E2EE Messages
+- `GET /api/chat/conversations` - Alle Konversationen abrufen
+- `POST /api/chat/conversations` - Neue Konversation erstellen
+- `GET /api/chat/conversations/:id/messages` - Verschlüsselte Nachrichten abrufen
+- `POST /api/chat/conversations/:id/messages` - Verschlüsselte Nachricht senden
+- `POST /api/chat/conversations/:id/flag-dispute` - Streitfall markieren
+- `GET /api/chat/keys/:userId` - Public Key eines Users abrufen
+- `POST /api/chat/keys` - Public Key setzen/updaten
+- `GET /api/chat/admin/disputes` - Admin: Alle Streitfälle
+- `GET /api/chat/admin/conversations/:id/messages` - Admin: Dispute Messages
+
 ## 📊 Datenbankmodelle
 
 ### User
@@ -123,23 +137,35 @@ Die App ist dann verfügbar unter `http://localhost:3000`
 - PayPal Integration
 - Zahlungsstatus Tracking
 
+### Conversation & Message
+- End-to-End Verschlüsselte Nachrichten (E2EE)
+- TweetNaCl (X25519-XSalsa20-Poly1305)
+- Dispute Management mit Admin-Zugriff
+- Public/Private Key System
+
 ## 🔐 Security Features
 
 - Password Hashing mit bcryptjs
 - JWT Token Authentication
+- **End-to-End Encryption** für Messages (TweetNaCl)
+- Password-Protected Private Keys
 - CORS Protection
 - Helmet für HTTP Headers
 - Input Validation
+- Admin Dispute Resolution (nur mit Zustimmung beider Parteien)
+
+📚 **Mehr Info**: Siehe [E2EE Messages Dokumentation](./docs/E2EE_MESSAGES.md)
 
 ## 🚦 Nächste Schritte
 
+- [x] Chat-Funktion mit End-to-End Encryption
+- [x] Dispute Resolution System
 - [ ] Real PayPal Integration implementieren
 - [ ] Email Benachrichtigungen
-- [ ] Bewertungssystem
-- [ ] Chat-Funktion zwischen Auftraggeber & Freelancer
-- [ ] File Upload für Portfolio
+- [ ] Bewertungssystem erweitern
+- [ ] File Upload für Portfolio & verschlüsselte Dateien
 - [ ] Search & Filter Optimierung
-- [ ] Admin Dashboard
+- [ ] Multi-Device Key Sync für E2EE
 - [ ] Mobile App
 
 ## 📝 Lizenz

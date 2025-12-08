@@ -7,13 +7,14 @@ const Message = sequelize.define('Message', {
     defaultValue: DataTypes.UUIDV4,
     primaryKey: true
   },
-  applicationId: {
+  conversationId: {
     type: DataTypes.UUID,
     allowNull: false,
     references: {
-      model: 'Applications',
+      model: 'Conversations',
       key: 'id'
-    }
+    },
+    comment: 'Conversation this message belongs to'
   },
   senderId: {
     type: DataTypes.UUID,
@@ -23,13 +24,38 @@ const Message = sequelize.define('Message', {
       key: 'id'
     }
   },
-  content: {
+  // E2EE Fields
+  encryptedContent: {
     type: DataTypes.TEXT,
-    allowNull: false
+    allowNull: false,
+    comment: 'Message encrypted with recipient public key'
+  },
+  encryptedForAdmin: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+    comment: 'Message encrypted with admin public key (only if adminAccessEnabled)'
+  },
+  nonce: {
+    type: DataTypes.STRING,
+    allowNull: false,
+    comment: 'Nonce for encryption'
+  },
+  senderPublicKey: {
+    type: DataTypes.TEXT,
+    allowNull: false,
+    comment: 'Sender public key at time of sending (for verification)'
   },
   messageType: {
-    type: DataTypes.ENUM('text', 'feedback', 'system'),
+    type: DataTypes.ENUM('text', 'system', 'dispute_flag'),
     defaultValue: 'text'
+  },
+  readAt: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
+  deletedAt: {
+    type: DataTypes.DATE,
+    allowNull: true
   },
   createdAt: {
     type: DataTypes.DATE,
@@ -37,7 +63,16 @@ const Message = sequelize.define('Message', {
   }
 }, {
   timestamps: true,
-  updatedAt: false
+  updatedAt: false,
+  paranoid: true,
+  indexes: [
+    {
+      fields: ['conversationId', 'createdAt']
+    },
+    {
+      fields: ['senderId']
+    }
+  ]
 });
 
 module.exports = Message;

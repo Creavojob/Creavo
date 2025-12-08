@@ -1,7 +1,14 @@
 import React, { useEffect, useState } from 'react';
 import api from '../services/api';
+import chatAPI from '../services/chatAPI';
 import { useAuth } from '../context/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import AdminEncryptionSetup from './AdminEncryptionSetup';
+import {
+  decryptMessage,
+  getSessionSecretKey,
+  getStoredKeys
+} from '../utils/crypto';
 
 const AdminDashboard = () => {
   const { user } = useAuth();
@@ -10,16 +17,20 @@ const AdminDashboard = () => {
   const [users, setUsers] = useState([]);
   const [jobs, setJobs] = useState([]);
   const [payments, setPayments] = useState([]);
+  const [disputes, setDisputes] = useState([]);
+  const [selectedDispute, setSelectedDispute] = useState(null);
+  const [disputeMessages, setDisputeMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('stats');
   const [error, setError] = useState('');
   const [showAdmins, setShowAdmins] = useState(true);
   const [showClients, setShowClients] = useState(true);
   const [showFreelancers, setShowFreelancers] = useState(true);
+  const [encryptionSetupComplete, setEncryptionSetupComplete] = useState(false);
 
   useEffect(() => {
     fetchStats();
-  }, []);
+  }, [navigate]);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -62,6 +73,69 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchDisputes = async () => {
+    try {
+      const res = await chatAPI.getAdminDisputes();
+      setDisputes(res.data);
+    } catch (err) {
+      console.error('Admin disputes error:', err);
+    }
+  };
+
+  const fetchDisputeMessages = async (conversationId) => {
+    try {
+      const res = await chatAPI.getAdminMessages(conversationId);
+      
+      // Decrypt messages
+      const mySecretKey = getSessionSecretKey();
+
+      if (!mySecretKey) {
+        setError('Bitte entsperren Sie Ihre Verschlüsselung erst');
+        return;
+      }
+
+      const decryptedMessages = await Promise.all(
+        res.data.map(async (msg) => {
+          try {
+            if (msg.messageType === 'dispute_flag' || msg.nonce === 'SYSTEM') {
+              return {
+                ...msg,
+                content: '🚩 Dispute markiert',
+                decrypted: true,
+                isSystem: true
+              };
+            }
+
+            const decryptedContent = decryptMessage(
+              msg.encryptedContent,
+              msg.nonce,
+              msg.senderPublicKey,
+              mySecretKey
+            );
+
+            return {
+              ...msg,
+              content: decryptedContent,
+              decrypted: true
+            };
+          } catch (err) {
+            console.error('Decryption error:', err);
+            return {
+              ...msg,
+              content: '[Entschlüsselung fehlgeschlagen]',
+              decrypted: false
+            };
+          }
+        })
+      );
+
+      setDisputeMessages(decryptedMessages);
+    } catch (err) {
+      console.error('Admin messages error:', err);
+      setError(err.response?.data?.error || 'Fehler beim Laden der Nachrichten');
+    }
+  };
+
   const deleteUser = async (id) => {
     if (!window.confirm('User wirklich löschen?')) return;
     try {
@@ -92,7 +166,8 @@ const AdminDashboard = () => {
     if (activeTab === 'users' && users.length === 0) fetchUsers();
     if (activeTab === 'jobs' && jobs.length === 0) fetchJobs();
     if (activeTab === 'payments' && payments.length === 0) fetchPayments();
-  }, [activeTab]);
+    if (activeTab === 'disputes' && disputes.length === 0) fetchDisputes();
+  }, [activeTab, users.length, jobs.length, payments.length, disputes.length]);
 
   if (loading) {
     return <div style={styles.container}><div style={styles.loading}>Lade Admin-Dashboard...</div></div>;
@@ -112,6 +187,7 @@ const AdminDashboard = () => {
         <button onClick={() => setActiveTab('users')} style={{...styles.tab, ...(activeTab === 'users' ? styles.tabActive : {})}}>👥 User</button>
         <button onClick={() => setActiveTab('jobs')} style={{...styles.tab, ...(activeTab === 'jobs' ? styles.tabActive : {})}}>💼 Jobs</button>
         <button onClick={() => setActiveTab('payments')} style={{...styles.tab, ...(activeTab === 'payments' ? styles.tabActive : {})}}>💰 Zahlungen</button>
+        <button onClick={() => setActiveTab('disputes')} style={{...styles.tab, ...(activeTab === 'disputes' ? styles.tabActive : {})}}>🚩 Streitfälle</button>
       </div>
 
       {activeTab === 'stats' && stats && (
@@ -438,6 +514,121 @@ const AdminDashboard = () => {
           </div>
         </div>
       )}
+
+      {activeTab === 'disputes' && (
+        <div style={styles.content}>
+          <h2 style={styles.sectionTitle}>🚩 Streitfälle & E2EE Nachrichten</h2>
+          
+          {!encryptionSetupComplete ? (
+            <AdminEncryptionSetup onSetupComplete={() => setEncryptionSetupComplete(true)} />
+          ) : (
+            <>
+              <div style={styles.disputeLayout}>
+                <div style={styles.disputeList}>
+                  <h3>Streitfälle</h3>
+                  {disputes.length === 0 ? (
+                    <p style={{color: '#888'}}>Keine aktiven Streitfälle</p>
+                  ) : (
+                    disputes.map(dispute => (
+                      <div 
+                        key={dispute.id}
+                        style={{
+                          ...styles.disputeItem,
+                          ...(selectedDispute?.id === dispute.id ? styles.disputeItemActive : {})
+                        }}
+                        onClick={() => {
+                          setSelectedDispute(dispute);
+                          fetchDisputeMessages(dispute.id);
+                        }}
+                      >
+                        <div style={styles.disputeHeader}>
+                          <strong>{dispute.job.title}</strong>
+                          <span style={{
+                            fontSize: '12px',
+                            padding: '2px 8px',
+                            borderRadius: '4px',
+                            backgroundColor: 
+                              dispute.disputeStatus === 'both_flagged' ? '#f44336' :
+                              dispute.disputeStatus === 'client_flagged' ? '#ff9800' :
+                              '#ff9800'
+                          }}>
+                            {dispute.disputeStatus === 'both_flagged' ? '⚠️ Beide' :
+                             dispute.disputeStatus === 'client_flagged' ? '🚩 Client' :
+                             '🚩 Freelancer'}
+                          </span>
+                        </div>
+                        <div style={{fontSize: '13px', color: '#888', marginTop: '4px'}}>
+                          Client: {dispute.client.firstName} {dispute.client.lastName}
+                        </div>
+                        <div style={{fontSize: '13px', color: '#888'}}>
+                          Freelancer: {dispute.freelancer.firstName} {dispute.freelancer.lastName}
+                        </div>
+                        {dispute.disputeStatus !== 'both_flagged' && (
+                          <div style={{fontSize: '12px', color: '#ff9800', marginTop: '8px'}}>
+                            ⚠️ Beide Parteien müssen flaggen für Admin-Zugriff
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+
+                <div style={styles.messageArea}>
+                  {!selectedDispute ? (
+                    <div style={{textAlign: 'center', color: '#888', padding: '40px'}}>
+                      Wählen Sie einen Streitfall aus
+                    </div>
+                  ) : selectedDispute.disputeStatus !== 'both_flagged' ? (
+                    <div style={{textAlign: 'center', color: '#ff9800', padding: '40px'}}>
+                      <h3>⚠️ Zugriff verweigert</h3>
+                      <p>Beide Parteien müssen den Streitfall markieren, bevor Sie die Nachrichten lesen können.</p>
+                    </div>
+                  ) : (
+                    <>
+                      <div style={styles.messageHeader}>
+                        <h3>Verschlüsselte Nachrichten</h3>
+                        <div style={{fontSize: '14px', color: '#888'}}>
+                          {disputeMessages.length} Nachrichten
+                        </div>
+                      </div>
+                      <div style={styles.messagesList}>
+                        {disputeMessages.length === 0 ? (
+                          <p style={{color: '#888', textAlign: 'center'}}>Keine Nachrichten</p>
+                        ) : (
+                          disputeMessages.map(msg => (
+                            <div 
+                              key={msg.id}
+                              style={{
+                                ...styles.adminMessage,
+                                backgroundColor: msg.isSystem ? '#2a2a0a' : '#2a2a2a'
+                              }}
+                            >
+                              <div style={styles.adminMessageHeader}>
+                                <strong>{msg.sender.firstName} {msg.sender.lastName}</strong>
+                                <span style={{fontSize: '12px', color: '#888'}}>
+                                  {new Date(msg.createdAt).toLocaleString('de-DE')}
+                                </span>
+                              </div>
+                              <div style={{marginTop: '8px'}}>
+                                {msg.content}
+                              </div>
+                              {!msg.decrypted && (
+                                <div style={{fontSize: '11px', color: '#f44336', marginTop: '4px'}}>
+                                  Entschlüsselung fehlgeschlagen
+                                </div>
+                              )}
+                            </div>
+                          ))
+                        )}
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      )}
     </div>
   );
 };
@@ -570,6 +761,70 @@ const styles = {
     padding: '3rem',
     color: '#ef4444',
     fontSize: '1.2rem'
+  },
+  disputeLayout: {
+    display: 'flex',
+    gap: '20px',
+    height: '600px'
+  },
+  disputeList: {
+    flex: '0 0 350px',
+    backgroundColor: '#1a1a1a',
+    borderRadius: '12px',
+    border: '2px solid #333',
+    padding: '15px',
+    overflowY: 'auto'
+  },
+  disputeItem: {
+    padding: '12px',
+    backgroundColor: '#2a2a2a',
+    borderRadius: '8px',
+    marginBottom: '10px',
+    cursor: 'pointer',
+    transition: 'background-color 0.2s',
+    border: '2px solid transparent'
+  },
+  disputeItemActive: {
+    backgroundColor: '#3a3a3a',
+    borderColor: '#00d4ff'
+  },
+  disputeHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: '8px'
+  },
+  messageArea: {
+    flex: 1,
+    backgroundColor: '#1a1a1a',
+    borderRadius: '12px',
+    border: '2px solid #333',
+    padding: '15px',
+    display: 'flex',
+    flexDirection: 'column'
+  },
+  messageHeader: {
+    borderBottom: '2px solid #333',
+    paddingBottom: '10px',
+    marginBottom: '15px'
+  },
+  messagesList: {
+    flex: 1,
+    overflowY: 'auto',
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px'
+  },
+  adminMessage: {
+    padding: '12px',
+    borderRadius: '8px',
+    border: '1px solid #333'
+  },
+  adminMessageHeader: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    color: '#00d4ff'
   }
 };
 

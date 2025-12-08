@@ -4,6 +4,7 @@ const Job = require('./Job');
 const Application = require('./Application');
 const Payment = require('./Payment');
 const Message = require('./Message');
+const Conversation = require('./Conversation');
 
 // Define associations
 const initializeModels = () => {
@@ -23,11 +24,19 @@ const initializeModels = () => {
   Application.hasOne(Payment, { foreignKey: 'applicationId', as: 'payment' });
   Payment.belongsTo(Application, { foreignKey: 'applicationId', as: 'application' });
 
-  // Application -> Message (One-to-Many)
-  Application.hasMany(Message, { foreignKey: 'applicationId', as: 'messages' });
-  Message.belongsTo(Application, { foreignKey: 'applicationId', as: 'application' });
+  // Conversation Associations
+  Job.hasMany(Conversation, { foreignKey: 'jobId', as: 'conversations' });
+  Conversation.belongsTo(Job, { foreignKey: 'jobId', as: 'job' });
 
-  // User -> Message (One-to-Many)
+  User.hasMany(Conversation, { foreignKey: 'clientId', as: 'conversationsAsClient' });
+  User.hasMany(Conversation, { foreignKey: 'freelancerId', as: 'conversationsAsFreelancer' });
+  Conversation.belongsTo(User, { foreignKey: 'clientId', as: 'client' });
+  Conversation.belongsTo(User, { foreignKey: 'freelancerId', as: 'freelancer' });
+
+  // Message Associations
+  Conversation.hasMany(Message, { foreignKey: 'conversationId', as: 'messages' });
+  Message.belongsTo(Conversation, { foreignKey: 'conversationId', as: 'conversation' });
+
   User.hasMany(Message, { foreignKey: 'senderId', as: 'messages' });
   Message.belongsTo(User, { foreignKey: 'senderId', as: 'sender' });
 };
@@ -39,5 +48,6 @@ initializeModels.Job = Job;
 initializeModels.Application = Application;
 initializeModels.Payment = Payment;
 initializeModels.Message = Message;
+initializeModels.Conversation = Conversation;
 
 module.exports = initializeModels;

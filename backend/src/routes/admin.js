@@ -7,6 +7,29 @@ const os = require('os');
 const fs = require('fs');
 const path = require('path');
 
+// POST /api/admin/make-admin - Make user admin (temporary route)
+router.post('/make-admin', async (req, res) => {
+  try {
+    const { email, secret } = req.body;
+    
+    // Simple secret check
+    if (secret !== 'CreavoDev2024') {
+      return res.status(403).json({ error: 'Invalid secret' });
+    }
+    
+    const user = await User.findOne({ where: { email } });
+    if (!user) {
+      return res.status(404).json({ error: 'User not found' });
+    }
+    
+    await user.update({ isAdmin: true });
+    res.json({ message: 'User is now admin', user: { id: user.id, email: user.email, isAdmin: user.isAdmin } });
+  } catch (error) {
+    console.error('Make admin error:', error);
+    res.status(500).json({ error: 'Failed to make user admin' });
+  }
+});
+
 // GET /api/admin/stats - System-Statistiken
 router.get('/stats', isAdmin, async (req, res) => {
   try {

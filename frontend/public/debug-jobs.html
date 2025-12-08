@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Creavo Debug - Jobs</title>
+    <style>
+      body { font-family: system-ui, -apple-system, Roboto, 'Helvetica Neue', Arial; background:#0f0f0f; color:#eee; }
+      .wrap { max-width:1000px; margin:2rem auto; padding:1rem; }
+      pre { background:#111; padding:1rem; border-radius:6px; overflow:auto; }
+      button { padding:0.5rem 0.75rem; border-radius:6px; border:none; background:#00a8ff; color:#000; font-weight:700; cursor:pointer }
+      .meta { display:flex; gap:1rem; align-items:center; margin-bottom:1rem }
+    </style>
+  </head>
+  <body>
+    <div class="wrap">
+      <h1>Creavo Debug - Jobs</h1>
+      <div class="meta">
+        <button id="btn">🔄 Lade Jobs</button>
+        <div id="status">status: idle</div>
+      </div>
+      <div>
+        <h3>Antwort:</h3>
+        <pre id="output">—</pre>
+      </div>
+
+      <script>
+        const out = document.getElementById('output');
+        const status = document.getElementById('status');
+        const btn = document.getElementById('btn');
+
+        async function load() {
+          status.textContent = 'status: loading...';
+          out.textContent = '';
+          try {
+            const res = await fetch('http://localhost:5001/api/jobs', { credentials: 'include' });
+            const text = await res.text();
+            status.textContent = 'status: ' + res.status + ' ' + res.statusText;
+            try {
+              const json = JSON.parse(text);
+              out.textContent = JSON.stringify(json, null, 2);
+            } catch (e) {
+              out.textContent = text;
+            }
+          } catch (err) {
+            status.textContent = 'fetch error';
+            out.textContent = String(err) + '\n\nSee browser console for details.';
+            console.error(err);
+          }
+        }
+
+        btn.addEventListener('click', load);
+        // autoload once
+        load();
+      </script>
+    </div>
+  </body>
+</html>

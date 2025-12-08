@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login Test</title>
+</head>
+<body>
+    <h1>Direct Login Test</h1>
+    <button onclick="testLogin()">Test Login</button>
+    <pre id="result"></pre>
+
+    <script>
+        async function testLogin() {
+            const start = Date.now();
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:5001/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'creavojob@gmail.com',
+                        password: 'AdminCreavo2024!'
+                    })
+                });
+                
+                const data = await response.json();
+                const duration = Date.now() - start;
+                
+                if (response.ok) {
+                    resultEl.textContent = `✅ SUCCESS in ${duration}ms\n${JSON.stringify(data, null, 2)}`;
+                    resultEl.style.color = 'green';
+                } else {
+                    resultEl.textContent = `❌ FAILED in ${duration}ms\nStatus: ${response.status}\n${JSON.stringify(data, null, 2)}`;
+                    resultEl.style.color = 'red';
+                }
+            } catch (error) {
+                const duration = Date.now() - start;
+                resultEl.textContent = `❌ ERROR in ${duration}ms\n${error.message}`;
+                resultEl.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>

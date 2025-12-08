@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>React Login Debug</title>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h1>React Login Simulation</h1>
+    <button onclick="testReactLogin()">Test React-Style Login</button>
+    <pre id="result"></pre>
+
+    <script>
+        const API_BASE_URL = 'http://localhost:5001/api';
+        
+        const api = axios.create({
+            baseURL: API_BASE_URL,
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            timeout: 10000
+        });
+
+        async function testReactLogin() {
+            const start = Date.now();
+            const resultEl = document.getElementById('result');
+            resultEl.textContent = 'Testing with axios (like React)...\n';
+            
+            try {
+                console.log('Starting login request...');
+                const response = await api.post('/auth/login', {
+                    email: 'creavojob@gmail.com',
+                    password: 'AdminCreavo2024!'
+                });
+                
+                const duration = Date.now() - start;
+                console.log('Success!', response.data);
+                
+                resultEl.textContent += `✅ SUCCESS in ${duration}ms\n`;
+                resultEl.textContent += `Token: ${response.data.token?.substring(0, 20)}...\n`;
+                resultEl.textContent += `User: ${response.data.email}\n`;
+                resultEl.style.color = 'green';
+            } catch (error) {
+                const duration = Date.now() - start;
+                console.error('Error:', error);
+                
+                resultEl.textContent += `❌ FAILED in ${duration}ms\n`;
+                resultEl.textContent += `Error type: ${error.constructor.name}\n`;
+                resultEl.textContent += `Message: ${error.message}\n`;
+                
+                if (error.response) {
+                    resultEl.textContent += `Response status: ${error.response.status}\n`;
+                    resultEl.textContent += `Response data: ${JSON.stringify(error.response.data)}\n`;
+                } else if (error.request) {
+                    resultEl.textContent += `No response received\n`;
+                    resultEl.textContent += `Request: ${error.request}\n`;
+                } else {
+                    resultEl.textContent += `Setup error: ${error.message}\n`;
+                }
+                
+                resultEl.style.color = 'red';
+            }
+        }
+    </script>
+</body>
+</html>

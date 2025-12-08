@@ -40,7 +40,7 @@ router.get('/stats', isAdmin, async (req, res) => {
     
     const totalJobs = await Job.count();
     const activeJobs = await Job.count({ where: { status: 'open' } });
-    const completedJobs = await Job.count({ where: { status: 'completed' } });
+    const completedJobs = await Job.count({ where: { status: 'abgeschlossen' } });
     
     const totalApplications = await Application.count();
     const pendingApplications = await Application.count({ where: { status: 'pending' } });

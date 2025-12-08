@@ -59,15 +59,23 @@ router.get('/stats', isAdmin, async (req, res) => {
       where: { createdAt: { [Op.gte]: sevenDaysAgo } }
     });
     
-    // System-Informationen
-    const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+    // System-Informationen - mit Error Handling für Render
     let uploadsDirSize = 0;
-    if (fs.existsSync(uploadsDir)) {
-      const files = fs.readdirSync(uploadsDir);
-      files.forEach(file => {
-        const stats = fs.statSync(path.join(uploadsDir, file));
-        uploadsDirSize += stats.size;
-      });
+    try {
+      const uploadsDir = path.join(__dirname, '..', '..', 'uploads');
+      if (fs.existsSync(uploadsDir)) {
+        const files = fs.readdirSync(uploadsDir);
+        files.forEach(file => {
+          try {
+            const stats = fs.statSync(path.join(uploadsDir, file));
+            uploadsDirSize += stats.size;
+          } catch (e) {
+            // Ignore einzelne File-Fehler
+          }
+        });
+      }
+    } catch (e) {
+      console.log('Filesystem error (expected on Render):', e.message);
     }
     
     const systemInfo = {
@@ -94,7 +102,8 @@ router.get('/stats', isAdmin, async (req, res) => {
     });
   } catch (err) {
     console.error('Admin stats error:', err);
-    res.status(500).json({ error: 'Fehler beim Laden der Statistiken' });
+    console.error('Error stack:', err.stack);
+    res.status(500).json({ error: 'Fehler beim Laden der Statistiken', details: err.message });
   }
 });
 

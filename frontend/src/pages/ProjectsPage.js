@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { jobsAPI, applicationsAPI, messagesAPI } from '../services/api';
+import { applicationsAPI, messagesAPI } from '../services/api';
 import ChatComponent from '../components/ChatComponent';
 import ReviewDialog from '../components/ReviewDialog';
 

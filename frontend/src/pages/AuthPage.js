@@ -10,10 +10,10 @@ const AuthPage = () => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [userType, setUserType] = useState('freelancer');
-  const [portfolioFile, setPortfolioFile] = useState(null);
-  const [resumeFile, setResumeFile] = useState(null);
   const [uploadedPortfolioUrl, setUploadedPortfolioUrl] = useState('');
   const [uploadedResumeUrl, setUploadedResumeUrl] = useState('');
+    const [portfolioFile, setPortfolioFile] = useState(null);
+    const [resumeFile, setResumeFile] = useState(null);
   const [uploadingPortfolio, setUploadingPortfolio] = useState(false);
   const [uploadingResume, setUploadingResume] = useState(false);
   const [showPassword, setShowPassword] = useState(false);

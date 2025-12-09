@@ -131,9 +131,9 @@ const ContactPage = () => {
                 Folge uns auf Social Media für Updates und News:
               </p>
               <div style={styles.socialLinks}>
-                <a href="#" style={styles.socialLink}>LinkedIn</a>
-                <a href="#" style={styles.socialLink}>Instagram</a>
-                <a href="#" style={styles.socialLink}>Twitter</a>
+                <button style={styles.socialLink} onClick={() => window.open('https://www.linkedin.com/company/creavo', '_blank')}>LinkedIn</button>
+                <button style={styles.socialLink} onClick={() => window.open('https://www.instagram.com/creavo', '_blank')}>Instagram</button>
+                <button style={styles.socialLink} onClick={() => window.open('https://twitter.com/creavo', '_blank')}>Twitter</button>
               </div>
             </div>
 

@@ -21,8 +21,9 @@ const HomePage = () => {
   const [budgetMin, setBudgetMin] = useState('');
   const [budgetMax, setBudgetMax] = useState('');
   const [filterOpen, setFilterOpen] = useState(false);
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   const navigate = useNavigate();
+    // entfernt: doppelte Deklaration von budgetMax
 
 
   const getExperienceYears = (experience) => {
@@ -56,7 +57,6 @@ const HomePage = () => {
     
     let matchesBudget = true;
     if (budgetMin) {
-      const min = parseFloat(budgetMin);
       if (budgetMin === '5000') {
         matchesBudget = job.budget >= 5000;
       } else if (budgetMin === '2500') {
@@ -505,6 +505,7 @@ const styles = {
     fontWeight: 'bold',
     cursor: 'pointer',
     transition: 'all 0.3s',
+    // entfernt: doppelter filterBar-Key
     boxShadow: '0 4px 12px rgba(0,168,255,0.3)'
   },
   stats: {

@@ -2,7 +2,7 @@ import React from 'react';
 import { useParams } from 'react-router-dom';
 import ChatComponent from '../components/ChatComponent';
 import { useState, useEffect } from 'react';
-import { jobsAPI, applicationsAPI } from '../services/api';
+import { applicationsAPI } from '../services/api';
 
 const MessageThreadPage = () => {
   const { applicationId } = useParams();

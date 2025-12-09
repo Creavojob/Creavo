@@ -30,7 +30,8 @@ const AdminDashboard = () => {
 
   useEffect(() => {
     fetchStats();
-  }, [navigate]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const fetchStats = async () => {
     setLoading(true);
@@ -167,7 +168,8 @@ const AdminDashboard = () => {
     if (activeTab === 'jobs' && jobs.length === 0) fetchJobs();
     if (activeTab === 'payments' && payments.length === 0) fetchPayments();
     if (activeTab === 'disputes' && disputes.length === 0) fetchDisputes();
-  }, [activeTab, users.length, jobs.length, payments.length, disputes.length]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [activeTab]);
 
   if (loading) {
     return <div style={styles.container}><div style={styles.loading}>Lade Admin-Dashboard...</div></div>;

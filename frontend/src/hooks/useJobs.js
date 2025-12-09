@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { jobsAPI } from '../services/api';
 
-const CACHE_KEY = 'creavo_jobs_cache';
+
 
 export default function useJobs() {
   const [jobs, setJobs] = useState([]);

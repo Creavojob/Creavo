@@ -122,83 +122,69 @@ const Navigation = () => {
       {/* Hamburger Dropdown Menu */}
       {menuOpen && (
         <div style={styles.dropdown}>
-          <a 
-            href="/concept" 
-            onClick={(e) => {
-              e.preventDefault();
+          <button
+            onClick={() => {
               navigate('/concept');
               setMenuOpen(false);
-            }} 
+            }}
             style={styles.dropdownLink}
           >
             Konzept
-          </a>
-          <a 
-            href="/about" 
-            onClick={(e) => {
-              e.preventDefault();
+          </button>
+          <button
+            onClick={() => {
               navigate('/about');
               setMenuOpen(false);
-            }} 
+            }}
             style={styles.dropdownLink}
           >
             Über uns
-          </a>
-          <a 
-            href="/contact" 
-            onClick={(e) => {
-              e.preventDefault();
+          </button>
+          <button
+            onClick={() => {
               navigate('/contact');
               setMenuOpen(false);
-            }} 
+            }}
             style={styles.dropdownLink}
           >
             Kontakt
-          </a>
-          <a 
-            href="/faq" 
-            onClick={(e) => {
-              e.preventDefault();
+          </button>
+          <button
+            onClick={() => {
               navigate('/faq');
               setMenuOpen(false);
-            }} 
+            }}
             style={styles.dropdownLink}
           >
             FAQ
-          </a>
-          <a 
-            href="/privacy" 
-            onClick={(e) => {
-              e.preventDefault();
+          </button>
+          <button
+            onClick={() => {
               navigate('/privacy');
               setMenuOpen(false);
-            }} 
+            }}
             style={styles.dropdownLink}
           >
             Datenschutz
-          </a>
-          <a 
-            href="/terms" 
-            onClick={(e) => {
-              e.preventDefault();
+          </button>
+          <button
+            onClick={() => {
               navigate('/terms');
               setMenuOpen(false);
-            }} 
+            }}
             style={styles.dropdownLink}
           >
             Nutzungsbedingungen
-          </a>
-          <a 
-            href="/imprint" 
-            onClick={(e) => {
-              e.preventDefault();
+          </button>
+          <button
+            onClick={() => {
               navigate('/imprint');
               setMenuOpen(false);
-            }} 
+            }}
             style={styles.dropdownLink}
           >
             Impressum
-          </a>
+          </button>
         </div>
       )}
     </nav>

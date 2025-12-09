@@ -1,19 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { applicationsAPI, jobsAPI } from '../services/api';
+import { applicationsAPI } from '../services/api';
 import { useNavigate } from 'react-router-dom';
 
-const FALLBACK_JOBS = [
-  { id: '1', title: 'Grafik Design - Social Media Content', category: 'Grafik & Design', description: 'Wir benötigen einen erfahrenen Grafikdesigner für die Erstellung von 30 Social-Media-Posts.', budget: '900.00', currency: 'EUR', experience: 'entry', status: 'open' },
-  { id: '2', title: 'Videocut & Post-Production - Eventfilm', category: 'Videoschnitt', description: 'Wir haben Rohmaterial von unserem Event und benötigen einen professionellen 10-Minuten Film.', budget: '1500.00', currency: 'EUR', experience: 'intermediate', status: 'open' },
-  { id: '3', title: 'Audio Editing & Sounddesign - Podcast', category: 'Audio & Sound', description: 'Unser Podcast braucht professionelle Audio-Bearbeitung. 8 Episoden à 45 Minuten.', budget: '1200.00', currency: 'EUR', experience: 'intermediate', status: 'open' },
-  { id: '4', title: '4K Produktvideo - Elektronik', category: 'Videoproduktion', description: 'Wir benötigen ein professionelles 4K Produktvideo für unsere neue Smartwatch.', budget: '2500.00', currency: 'EUR', experience: 'expert', status: 'open' },
-  { id: '5', title: 'Motion Graphics - Erklärvideo', category: 'Animation & Motion Graphics', description: 'Wir suchen einen Motion Graphics Designer für ein 90-Sekunden Erklärvideo.', budget: '1800.00', currency: 'EUR', experience: 'intermediate', status: 'open' }
-];
+import useJobs from '../hooks/useJobs';
+
+
 
 const HomePage = () => {
-  const [jobs, setJobs] = useState(FALLBACK_JOBS);
-  const [loading, setLoading] = useState(false);
+  const { jobs, loading, error, refresh } = useJobs();
   const [selectedJob, setSelectedJob] = useState(null);
   const [applyJob, setApplyJob] = useState(null);
   const [applyMessage, setApplyMessage] = useState('');
@@ -29,31 +24,6 @@ const HomePage = () => {
   const { isAuthenticated, user } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const fetchJobs = async () => {
-      try {
-        const cached = localStorage.getItem('creavo_jobs_cache');
-        if (cached) {
-          const parsed = JSON.parse(cached);
-          if (parsed && Array.isArray(parsed.jobs) && parsed.jobs.length > 0) {
-            setJobs(parsed.jobs);
-          }
-        }
-      } catch (e) {}
-      
-      try {
-        const res = await jobsAPI.getAll({ status: 'open', limit: 100 });
-        if (res.data && Array.isArray(res.data)) {
-          setJobs(res.data);
-          localStorage.setItem('creavo_jobs_cache', JSON.stringify({ jobs: res.data, timestamp: Date.now() }));
-        }
-      } catch (err) {
-        console.log('API offline, using fallback jobs');
-      }
-    };
-    fetchJobs();
-  }, []);
-
 
   const getExperienceYears = (experience) => {
     switch(experience) {
@@ -64,7 +34,17 @@ const HomePage = () => {
     }
   };
 
-  // refresh() can be called to re-fetch jobs from server and update cache
+
+  // Fehleranzeige
+  if (error) {
+    return (
+      <div style={{ color: 'red', padding: 32 }}>
+        <h2>Fehler beim Laden der Jobs</h2>
+        <pre>{error.message || String(error)}</pre>
+        <button onClick={refresh}>Erneut versuchen</button>
+      </div>
+    );
+  }
 
   const filteredJobs = jobs.filter(job => {
     const matchesSearch = !searchTerm || 

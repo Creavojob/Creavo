@@ -1,6 +1,8 @@
 // Seed-Runner - Zum Erstellen von Demo-Daten
 // Verwendung: node backend/src/seeds/runSeed.js
 
+require('dotenv').config();
+console.log('DB_PASSWORD:', process.env.DB_PASSWORD);
 const initializeModels = require('../models');
 const sequelize = initializeModels.sequelize;
 const seedJobs = require('./seedJobs');
